@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+  <title>可移动侧边栏</title>
+  <style>
+    body:before {
+      content: '鼠标点击根据鼠标移动改变元素top、left，鼠标松开判断元素left是否超过红线并添加过渡动画和改变left值';
+      color: #fff;
+      font-size: 20px;
+    }
+
+    body:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: calc(50vw - 1px);
+      width: 2px;
+      bottom: 0;
+      background: #f00;
+    }
+
+    .side-box {
+      position: fixed;
+      top: calc(50vh - 40px);
+      left: 0;
+      width: 30px;
+      height: 80px;
+      background: lightskyblue;
+      writing-mode: vertical-lr;
+      text-align: center;
+      line-height: 30px;
+      user-select: none;
+      cursor: grab;
+      letter-spacing: 4px;
+      border-radius: 4px;
+      /*animation: shine 1s infinite linear;*/
+    }
+
+    @keyframes shine {
+      0% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="side-box">工具栏</div>
+<script type="text/javascript">
+  let drag = false;
+  window.onload = () => {
+    const sideBox = document.querySelector('.side-box'),
+        sideBoxL = sideBox.clientWidth / 2,
+        sideBoxT = sideBox.clientHeight / 2;
+
+    // 鼠标按下
+    sideBox.addEventListener('mousedown', () => {
+      sideBox.style.transition = '';
+      drag = true
+    })
+
+    // 鼠标抬起
+    window.addEventListener('mouseup', () => {
+      drag = false;
+      // 因为防抖延迟了100ms
+      setTimeout(() => {
+        const left = Number(sideBox.style.left.replace('px', '')), rootW = document.documentElement.clientWidth;
+        if (left < (rootW - sideBox.clientWidth) / 2) {
+          sideBox.style.transition = 'left ' + left + 'ms';
+          sideBox.style.left = 0;
+        } else {
+          sideBox.style.transition = 'left ' + (rootW - left) + 'ms';
+          sideBox.style.left = rootW - sideBox.clientWidth + 'px';
+        }
+      }, 100)
+    })
+
+    // 鼠标移动
+    window.addEventListener('mousemove', e => {
+      if (drag) {
+        // 加上防抖感觉不跟手，可以设置延迟小一点
+        debounce(function () {
+          sideBox.style.top = e.clientY - sideBoxT + 'px'
+          sideBox.style.left = e.clientX - sideBoxL + 'px'
+        }, 100)(e)
+      }
+    })
+
+
+  }
+
+  /* 防抖 */
+  function debounce(fn, delay) {
+    let timer = null //借助闭包
+    return function () {
+      if (timer) {
+        clearTimeout(timer)
+      }
+      timer = setTimeout(fn, delay) // 简化写法
+    }
+  }
+
+  /* 节流 */
+  function throttle(fn,delay){
+    let valid = true
+    return function() {
+      if(!valid){
+        //休息时间 暂不接客
+        return false
+      }
+      // 工作时间，执行函数并且在间隔期内把状态位设为无效
+      valid = false
+      setTimeout(() => {
+        fn()
+        valid = true;
+      }, delay)
+    }
+  }
+</script>
+</body>
+</html>
