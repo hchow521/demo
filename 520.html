@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="cn-zh">
+
+<head>
+  <link rel="icon" href="./favicon.ico">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <title>微信生成520文字排版</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      outline: 0;
+    }
+
+    @keyframes bgSize {
+      0% {
+        background-size: 300% 100%;
+      }
+
+      100% {
+        background-size: 100% 100%;
+      }
+    }
+    @keyframes loop {
+      0% {
+        left: -100%;
+        color: #e91e1e;
+      }
+      50% {
+        left: 0;
+        color: #00ff88;
+      }
+      100% {
+        left: 100%;
+        color: #ffc700;
+      }
+    }
+
+    body {
+      height: 100vh;
+      background: rgb(25, 160, 175) linear-gradient(70deg, #ffc700 0%, #e91e1e 33%, #6f27b0 66%, #00ff88 100%);
+      background-position: 100% 0;
+      animation: bgSize 5s infinite ease-in-out alternate;
+      color: #1a0b0b;
+    }
+
+    .container {
+      padding-top: 20px;
+      text-align: center;
+    }
+    .container > *
+    {
+      margin-bottom: 20px;
+    }
+    .container > h1
+    {
+      opacity: .6;
+    }
+    .public
+    {
+      border: 0;
+      line-height: 1.88235294;
+      padding: 8px 24px;
+      font-size: 17px;
+      border-radius: 8px;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .container > input {
+      background: rgba(0,0,0,0.3);
+      color: rgba(255, 255, 255, .8);
+    }
+
+    .container > textarea {
+      width: 360px;
+      background: rgba(0,0,0,0.3);
+      font-size: 14px;
+      color: rgba(255, 255, 255, .8);
+    }
+
+    .copyright {
+      position: absolute;
+      bottom: 5px;
+      width: 100%;
+      text-align: center;
+      font-size: 14px;
+      color: #999;
+    }
+    .wx-btn
+    {
+      background: #07c160;
+      box-sizing: border-box;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      color: #d3d8dd;
+      -webkit-tap-highlight-color: rgba(0,0,0,0);
+    }
+    .loop
+    {
+      width: 100%;
+      position: absolute;
+      animation: loop 5s infinite linear;
+      opacity: .8;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>生成520文字排版</h1>
+    <input class="public" type="text" placeholder="请输入三/四个文字" max="3" min="3" onkeyup="submit()">
+    <button class="wx-btn public" onclick="submit()">生成</button>
+    <br>
+    <textarea id="textarea" class="public" cols="30" rows="10" readonly data-clipboard-target="#textarea"></textarea>
+    <p class="loop">复制发给ta,暖ta一整天</p>
+  </div>
+  <div class="copyright">Copyright © 2019 - 2022 <a href="javascript:handleClick();">周星星</a> 版权所有</div>
+  <script>
+    function submit() {
+      const value = document.querySelector('input').value
+      if (value.length === 3 || value.length === 4) {
+        document.querySelector('textarea').value = gen(value)
+      }
+    }
+    function gen(input) {
+      var template = "{1}{1}{1}　    {2}{2}{2}          {3}  {4}\n"
+        + "{1}　　　　　    {2}        {3}     {4}\n"
+        + "{1}{1}{1}        {2}{2}{2}       {3}       {4}\n"
+        + "　　{1}        {2}  　　      {3}     {4}\n"
+        + "{1}{1}{1}        {2}{2}{2}          {3} {4}";
+      input = UnicodeString(input.replace(/\b/g, ""));
+      return template.replace(/\{1\}/g, input.slice(0, 1)).replace(/\{2\}/g, input.slice(1, 2)).replace(/\{3\}/g, input.slice(2, 3)).replace(/\{4\}/g, input.length === 3 ? input.slice(2, 3) : input.slice(3, 4));
+    }
+    var UnicodeString = (function () {
+      function surrogatePairToCodePoint(charCode1, charCode2) {
+        return ((charCode1 & 0x3FF) << 10) + (charCode2 & 0x3FF) + 0x10000;
+      }
+
+      function stringToCodePointArray(str) {
+        var codePoints = [], i = 0, charCode;
+        while (i < str.length) {
+          charCode = str.charCodeAt(i);
+          if ((charCode & 0xF800) == 0xD800) {
+            codePoints.push(surrogatePairToCodePoint(charCode, str.charCodeAt(++i)));
+          } else {
+            codePoints.push(charCode);
+          }
+          ++i;
+        }
+        return codePoints;
+      }
+
+      function codePointArrayToString(codePoints) {
+        var stringParts = [];
+        for (var i = 0, len = codePoints.length, codePoint, offset, codePointCharCodes; i < len; ++i) {
+          codePoint = codePoints[i];
+          if (codePoint > 0xFFFF) {
+            offset = codePoint - 0x10000;
+            codePointCharCodes = [0xD800 + (offset >> 10), 0xDC00 + (offset & 0x3FF)];
+          } else {
+            codePointCharCodes = [codePoint];
+          }
+          stringParts.push(String.fromCharCode.apply(String, codePointCharCodes));
+        }
+        return stringParts.join("");
+      }
+
+      function UnicodeString(arg) {
+        if (this instanceof UnicodeString) {
+          this.codePoints = (typeof arg == "string") ? stringToCodePointArray(arg) : arg;
+          this.length = this.codePoints.length;
+        } else {
+          return new UnicodeString(arg);
+        }
+      }
+
+      UnicodeString.prototype = {
+        slice: function (start, end) {
+          return new UnicodeString(this.codePoints.slice(start, end));
+        },
+
+        toString: function () {
+          return codePointArrayToString(this.codePoints);
+        }
+      };
+
+
+      return UnicodeString;
+    })();
+    onload = () => {
+      document.querySelector('textarea').value = gen('精忠报国')
+    }
+    function handleClick() {
+      alert('人之初，手多多')
+    }
+    function copy(el) {
+      console.log(el.value)
+    }
+    var clipboard = new ClipboardJS('#textarea');
+    clipboard.on('success', function(e) {
+      alert('复制成功，赶快发给ta吧')
+    });
+
+    clipboard.on('error', function(e) {
+      console.error('Action:', e.action);
+      console.error('Trigger:', e.trigger);
+      alert('很抱歉，复制失败了，请手动选中文本复制吧。。')
+      clipboard.destroy();
+    });
+  </script>
+</body>
+
+</html>
